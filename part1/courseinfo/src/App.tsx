@@ -1,28 +1,52 @@
-import Content from "./components/Content"
-import Header from "./components/Header"
-import Total from "./components/Total"
+import Course from "../components/Course/Course";
 
+import {ICourse} from "../types/types"
 
 function App() {
 
- const course = {
+ const courses: ICourse[] = [{
+  id: 1,
   name: 'Half Stack application development',
   parts:  [
-    {name: 'Fundamentals of React', exercises: 10},    
-    {name: 'Using props to pass data', exercises: 7},
-    {name: 'State of a component', exercises: 14}
+    {name: 'Fundamentals of React', exercises: 10, id: 1},    
+    {name: 'Using props to pass data', exercises: 7, id: 2},
+    {name: 'State of a component', exercises: 14, id: 3},
+    {name: 'Redux', exercises: 11, id: 4}
+  ],
+totalExercises() {
+  return this.parts.reduce((sum, part) => sum + part.exercises, 0);
+}
+},
+{
+  id: 2,
+  name: 'Node.js',
+  parts: [
+    {
+      name: 'Routing',
+      exercises: 3,
+      id: 1
+    },
+    {
+      name: 'Middlewares',
+      exercises: 7,
+      id: 2
+    }
   ],
 totalExercises() {
   return this.parts.reduce((sum, part) => sum + part.exercises, 0);
 }
 }
+]
 
 
 return (
     <div>
-      <Header course={course.name}></Header>
-      <Content parts={course.parts}></Content>
-      <Total total = {course.totalExercises()}></Total>
+      {
+        courses.map((course) => {
+          return  <Course key={course.id} course={course}></Course>
+        })
+      }
+      
     </div>
   )
 

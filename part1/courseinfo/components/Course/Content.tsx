@@ -1,10 +1,8 @@
-interface Part {
-  name: string,
-  exercises: number
-}
+import { ICoursePart } from "../../types/types"
+
 
 interface Props {
-  parts: Part[]
+  parts: ICoursePart[]
 }
 
 const Content: React.FC<Props> = ({ parts }) => {
@@ -12,7 +10,7 @@ const Content: React.FC<Props> = ({ parts }) => {
     <>
     
     {parts.map(part => (
-      <p>
+      <p key={part.id}>
         {part.name} | {part.exercises}
       </p>  
     ))}
