@@ -4,7 +4,7 @@ interface Props {
     handleFormInput: (e:  React.ChangeEvent<HTMLInputElement>) => void;
     handleFormSubmit: (e: React.SyntheticEvent) => void,
     formValues: IformValue,
-    showAlert: boolean
+    showAlert: {value: string | null, type: "notice" | "warning" | "success"} | false
   }
   
   // Functional component with typed props
@@ -22,7 +22,7 @@ interface Props {
           <input type="submit" value="submit"></input>
         </div>
       </form>
-      {showAlert ? <div className="notice warning">Input should be filled</div> : null}
+      {showAlert ? <div className={showAlert.type !== "notice" ? `notice ${showAlert.type}`  : "notice"}>{showAlert.value}</div> : null}
       </>
     );
   };

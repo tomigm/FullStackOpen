@@ -10,7 +10,7 @@ interface Props {
       <ul>
       {
         personList
-        .filter(p => p.name.toLowerCase().includes(searchValue))
+        .filter(p => p.name?.toLowerCase().includes(searchValue))
         .map(p=> {
           return <li key={p.id}>{p.id} | {p.name} | {p.number} <button onClick={() => handleDelete(p)}> DELETE </button></li>
         })

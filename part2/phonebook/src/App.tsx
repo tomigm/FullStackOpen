@@ -4,10 +4,11 @@ import SearchInput from "../components/Course/SearchInput";
 import ContactForm from "../components/Course/ContactForm";
 import PhoneList from "../components/Course/PhoneList";
 import personsService from "./services/persons"
+import "./style.css"
 function App() {
-  const [persons, setPersons] = useState<Ipersons[]>([]) ;
+  const [persons, setPersons] = useState<Ipersons[] | null>(null) ;
   const [formValues, setFormValues] = useState<IformValue>({name: '', number: ''});
-  const [formAlert, setFormAlert] = useState<boolean>(false)
+  const [formAlert, setFormAlert] = useState<{value: string | null, type: "notice" | "warning" | "success"} | false>(false)
   const [searchValue, setSearchValue] = useState<string>('')
   
 
@@ -18,34 +19,45 @@ useEffect(() => {
   setPersons(initialData)
 }))
 }, []);
+
+const setAlert = (message: string, type: "notice" | "warning" | "success", timeout = 5000) => {
+  setFormAlert({ value: message, type });
+  setTimeout(() => setFormAlert(false), timeout);
+};
+
+function checkEmptyObject(e: object) {
+  return Object.values(e).some(x => x === '');
+}
 function handleFormSubmit(e: React.SyntheticEvent){
 
     e.preventDefault();
     if(checkEmptyObject(formValues)) {
-      setFormAlert(true);
+      setFormAlert({value: "Form Inputs cannot be empty", type: "warning"});
       return
     }
-    if(persons.some(el => el.name === formValues.name)){
- 
-      if(confirm(formValues.name + " already exists in phonebook, do you want to update its number?")){
-        const  filteredPerson = persons.find(person => {return person.name === formValues.name});
-        const changedPerson = { ...filteredPerson, number: formValues.number};
-        
+    const existingPerson = persons!.find(person => person.name === formValues.name);
 
-        console.log(`to change ${formValues.name} with ${formValues.number} || newdata is  `, filteredPerson);
-        console.log(filteredPerson, " new object would be ", changedPerson);
+    if(existingPerson){
+      if(confirm(formValues.name + " already exists in phonebook, do you want to update its number?")){
+
+        const changedPerson = { ...existingPerson, number: formValues.number};
         personsService.update(changedPerson.id!, changedPerson).then(
           response => {
-            setPersons(persons.map(
+            setPersons(persons!.map(
               person => {
                 return person.id !== response.id ? person : changedPerson
               }
             ));
             setFormValues({name: '', number: ''}); 
-
+            setAlert( `${changedPerson.name} old number: ${existingPerson?.number} modified with: ${changedPerson.number}`, "notice", 5000)
           }
-        )
-
+        ).catch(() => {
+          setAlert(`Element is not in the server anymore, phonelist updated`, "warning", 5000)
+        })
+        setPersons(persons!.filter(
+          person => person.id !== existingPerson?.id
+        ));
+        setFormValues({name: '', number: ''}); 
       }
       return;
     }    
@@ -53,17 +65,21 @@ function handleFormSubmit(e: React.SyntheticEvent){
     
     
     personsService.create(person)
-    .then(newPerson => {setPersons(persons.concat(newPerson))})
+    .then(newPerson => {
+      setPersons(persons!.concat(newPerson))
+        setAlert(`'${person.name}' created`, "success", 5000)
+    })
     setFormValues({name: '', number: ''});  
   }
 
-  function checkEmptyObject(e: object) {
-    return Object.values(e).some(x => x === '');
-  }
+  
   function handleFormInput(e: React.ChangeEvent<HTMLInputElement>){
     const {name, value} = e.target
-    if(checkEmptyObject(formValues)) {
-      setFormAlert(true);
+    if(checkEmptyObject(formValues)) {      
+      setFormAlert({
+        value: `Form inputs cannot be empty`,
+        type: "warning"
+    });
     }
     setFormValues((prevFormData) => ({
       ...prevFormData,
@@ -80,22 +96,24 @@ function handleFormSubmit(e: React.SyntheticEvent){
     if(confirm("do you really want to delete " + person.name + "?")){
       personsService.deleteSingle(person.id!).then( deletedPerson => {
         console.log(deletedPerson);
-        setPersons(persons.filter(p => p.id !== person.id));
+        setPersons(persons!.filter(p => p.id !== person.id));
+        setAlert(`${person.name} removed`, "warning", 5000)        
       } 
       );
     };   
+  }
+  if (!persons) { 
+    return <><p>No data to be displayed</p></>
   }
   return (
     <div>
       <SearchInput handleSearch={handleSearch}></SearchInput>
       <h2>Phonebook</h2>
-      <ContactForm handleFormInput={handleFormInput} handleFormSubmit={handleFormSubmit} showAlert= {formAlert} formValues={formValues}></ContactForm>
+      <ContactForm handleFormInput={handleFormInput} handleFormSubmit={handleFormSubmit} showAlert = {formAlert} formValues={formValues}></ContactForm>
       <h2>Numbers</h2>
       <PhoneList handleDelete={handleDelete} personList={persons} searchValue={searchValue}></PhoneList>
     </div>
   )
-
 }
-
 
 export default App
