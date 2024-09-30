@@ -1,6 +1,6 @@
 export interface Ipersons {
-  name: string,
-  id: number,
+  name?: string,
+  id?: string,
   number: string
 }
 export interface IformValue {
