@@ -1,0 +1,3 @@
+[submodule "part3/fullstackOpen-part3"]
+	path = part3/fullstackOpen-part3
+	url = https://github.com/tomigm/fullstackOpen-part3.git
